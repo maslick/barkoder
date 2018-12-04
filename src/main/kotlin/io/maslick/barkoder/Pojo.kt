@@ -20,5 +20,5 @@ data class Item(
 
 
 interface MyRepo : JpaRepository<Item, Int> {
-    fun findByBarcode(barcode: String): Item?
+    fun findOneByBarcode(barcode: String): Item?
 }

@@ -80,10 +80,17 @@ class IntegrationTest {
 	}
 
 	@Test
-	fun testPostBarcode() {
-		kogda(service.saveOne(any())).then { println("saving to database...") }
+	fun testPostBarcodeOk() {
+		kogda(service.saveOne(any())).thenReturn(true)
 		val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Resp::class.java).body!!
 		Assert.assertEquals(Status.OK, resp.status)
+	}
+
+	@Test
+	fun testPostBarcodeAlreadyExists() {
+		kogda(service.saveOne(any())).thenReturn(false)
+		val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Resp::class.java).body!!
+		Assert.assertEquals(Status.ERROR, resp.status)
 	}
 
 	@Test

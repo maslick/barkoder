@@ -47,8 +47,8 @@ class BarcoderRestController(val service: IService) {
     @PostMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun postItem(@RequestBody item: Item): Resp {
         return try {
-            service.saveOne(item)
-            Resp(item, OK)
+            if (service.saveOne(item)) Resp(item, OK)
+            else Resp(item, ERROR)
         } catch (e: Exception) {
             e.printStackTrace()
             Resp(item, ERROR)
@@ -57,8 +57,7 @@ class BarcoderRestController(val service: IService) {
 
     @PutMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun putItem(@RequestBody item: Item): Resp {
-        return if (service.updateOne(item))
-            Resp(item, OK)
+        return if (service.updateOne(item)) Resp(item, OK)
         else Resp(item, ERROR)
     }
 }
@@ -67,7 +66,7 @@ interface IService {
     fun getAll(): List<Item>
     fun getOneById(id: Int): Item?
     fun getOneByBarcode(barcode: String): Item?
-    fun saveOne(item: Item)
+    fun saveOne(item: Item): Boolean
     fun updateOne(item: Item): Boolean
 }
 
@@ -75,14 +74,18 @@ interface IService {
 class MyService(val repo: MyRepo): IService {
     override fun getAll() = repo.findAll()
     override fun getOneById(id: Int) = repo.findById(id).orElse(null)
-    override fun getOneByBarcode(barcode: String) = repo.findByBarcode(barcode)
-    override fun saveOne(item: Item) { repo.save(item) }
+    override fun getOneByBarcode(barcode: String) = repo.findOneByBarcode(barcode)
+    override fun saveOne(item: Item): Boolean {
+        if (repo.findOneByBarcode(item.barcode!!) != null) return false
+        repo.save(item)
+        return true
+    }
     override fun updateOne(item: Item): Boolean {
-        if (repo.existsById(item.id!!)) {
+        return if (repo.existsById(item.id!!)) {
             repo.save(item)
-            return true
+            true
         }
-        return false
+        else false
     }
 }
 

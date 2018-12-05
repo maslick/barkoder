@@ -2,6 +2,7 @@ buildscript {
     ext {
         kotlinVersion = '1.3.10'
         springBootVersion = '2.1.1.RELEASE'
+        keycloakVersion = '4.6.0.Final'
     }
     repositories {
         mavenCentral()
@@ -59,4 +60,14 @@ dependencies {
     // swagger
     implementation "io.springfox:springfox-swagger2:2.8.0"
     implementation "io.springfox:springfox-swagger-ui:2.8.0"
+
+    // keycloak
+    compile 'org.keycloak:keycloak-spring-boot-starter'
+}
+
+
+dependencyManagement {
+    imports {
+        mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+    }
 }

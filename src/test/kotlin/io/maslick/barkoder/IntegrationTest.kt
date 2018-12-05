@@ -3,6 +3,7 @@ package io.maslick.barkoder
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.keycloak.adapters.springboot.KeycloakAutoConfiguration
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -199,7 +200,7 @@ fun <T : Any> createInstance(kClass: KClass<T>): T = castNull()
 
 @TestConfiguration
 @ComponentScan
-@EnableAutoConfiguration(exclude = [DataSourceAutoConfiguration::class])
+@EnableAutoConfiguration(exclude = [DataSourceAutoConfiguration::class, KeycloakAutoConfiguration::class])
 class MyTestConfig
 
 

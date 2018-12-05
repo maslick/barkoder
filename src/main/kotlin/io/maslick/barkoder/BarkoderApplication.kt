@@ -1,6 +1,7 @@
 package io.maslick.barkoder
 
 
+import com.google.common.base.Predicates
 import io.maslick.barkoder.Status.*
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -94,8 +95,8 @@ class MyService(val repo: MyRepo): IService {
 class SwaggerConfig {
     @Bean
     fun api() = Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-                .build()
+            .select()
+            .apis(RequestHandlerSelectors.any())
+            .paths(Predicates.not(PathSelectors.regex("/error")))
+            .build()
 }

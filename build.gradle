@@ -10,11 +10,13 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
     }
 }
 
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
+apply plugin: 'kotlin-jpa'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -38,7 +40,6 @@ compileTestKotlin {
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
     jcenter()
 }
 
@@ -52,11 +53,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    runtime('org.postgresql:postgresql')
+    runtimeOnly ("org.postgresql:postgresql:42.2.5")
+//    runtime("com.h2database:h2")
 
     // swagger
     implementation "io.springfox:springfox-swagger2:2.8.0"
     implementation "io.springfox:springfox-swagger-ui:2.8.0"
-
-
 }

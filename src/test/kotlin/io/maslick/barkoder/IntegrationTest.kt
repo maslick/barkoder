@@ -17,6 +17,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import kotlin.reflect.KClass
@@ -113,7 +114,7 @@ class IntegrationTest {
 				object : ParameterizedTypeReference<Resp>() {}
 		).body!!
 		Assert.assertEquals(Status.OK, resp.status)
-		Assert.assertEquals(123, resp.check!!.id)
+		Assert.assertEquals(123, resp.item!!.id)
 	}
 
 	@Test
@@ -126,8 +127,67 @@ class IntegrationTest {
 				object : ParameterizedTypeReference<Resp>() {}
 		).body!!
 		Assert.assertEquals(Status.ERROR, resp.status)
-		Assert.assertEquals(123, resp.check!!.id)
+		Assert.assertEquals(123, resp.item!!.id)
 	}
+
+	@Test
+	fun deleteItem() {
+		kogda(service.deleteOne(any())).then { println("deleting item...") }
+		val resp = restTemplate.exchange(
+				"http://localhost:$port/item/123/delete",
+				HttpMethod.DELETE,
+				null,
+				object : ParameterizedTypeReference<Resp>() {}
+		)
+		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+		Assert.assertEquals(Status.OK, resp.body!!.status)
+	}
+
+	@Test
+	fun deleteItemThatsNotInDb() {
+		kogda(service.deleteOne(any())).then {
+			println("deleting item...")
+			throw RuntimeException("Error removing item :(")
+		}
+		val resp = restTemplate.exchange(
+				"http://localhost:$port/item/123/delete",
+				HttpMethod.DELETE,
+				null,
+				object : ParameterizedTypeReference<Resp>() {}
+		)
+		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+		Assert.assertEquals(Status.ERROR, resp.body!!.status)
+	}
+
+	@Test
+	fun deleteItemByBarcode() {
+		kogda(service.deleteOneByBarcode(any())).then { println("deleting item by barcode...") }
+		val resp = restTemplate.exchange(
+				"http://localhost:$port/barcode/123/delete",
+				HttpMethod.DELETE,
+				null,
+				object : ParameterizedTypeReference<Resp>() {}
+		)
+		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+		Assert.assertEquals(Status.OK, resp.body!!.status)
+	}
+
+	@Test
+	fun deleteItemByBarcodeThatsNotInDb() {
+		kogda(service.deleteOneByBarcode(any())).then {
+			println("deleting item by barcode...")
+			throw RuntimeException("Error removing item :(")
+		}
+		val resp = restTemplate.exchange(
+				"http://localhost:$port/barcode/123/delete",
+				HttpMethod.DELETE,
+				null,
+				object : ParameterizedTypeReference<Resp>() {}
+		)
+		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+		Assert.assertEquals(Status.ERROR, resp.body!!.status)
+	}
+
 }
 
 // Helper methods

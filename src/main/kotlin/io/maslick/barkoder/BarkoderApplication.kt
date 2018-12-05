@@ -25,9 +25,10 @@ fun main(args: Array<String>) {
 }
 
 enum class Status { ERROR, OK }
-data class Resp(val check: Item?, val status: Status)
+data class Resp(val item: Item?, val status: Status)
 
 @RestController
+@CrossOrigin
 class BarcoderRestController(val service: IService) {
 
     @GetMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
@@ -61,6 +62,28 @@ class BarcoderRestController(val service: IService) {
         return if (service.updateOne(item)) Resp(item, OK)
         else Resp(item, ERROR)
     }
+
+    @DeleteMapping(value = ["/item/{id}/delete"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    fun deleteItem(@PathVariable id: Int): Resp {
+        return try {
+            service.deleteOne(id)
+            Resp(null, OK)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resp(null, ERROR)
+        }
+    }
+
+    @DeleteMapping(value = ["/barcode/{barcode}/delete"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    fun deleteItemByBarcode(@PathVariable barcode: String): Resp {
+        return try {
+            service.deleteOneByBarcode(barcode)
+            Resp(null, OK)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resp(null, ERROR)
+        }
+    }
 }
 
 interface IService {
@@ -69,6 +92,8 @@ interface IService {
     fun getOneByBarcode(barcode: String): Item?
     fun saveOne(item: Item): Boolean
     fun updateOne(item: Item): Boolean
+    fun deleteOne(id: Int)
+    fun deleteOneByBarcode(barcode: String)
 }
 
 @Service
@@ -76,17 +101,31 @@ class MyService(val repo: MyRepo): IService {
     override fun getAll() = repo.findAll()
     override fun getOneById(id: Int) = repo.findById(id).orElse(null)
     override fun getOneByBarcode(barcode: String) = repo.findOneByBarcode(barcode)
+
     override fun saveOne(item: Item): Boolean {
         if (repo.findOneByBarcode(item.barcode!!) != null) return false
         repo.save(item)
         return true
     }
+
     override fun updateOne(item: Item): Boolean {
         return if (repo.existsById(item.id!!)) {
             repo.save(item)
             true
         }
         else false
+    }
+
+    override fun deleteOne(id: Int) {
+        val item = repo.findById(id).orElse(null)
+        if (item == null) throw RuntimeException("item not found!")
+        else repo.delete(item)
+    }
+
+    override fun deleteOneByBarcode(barcode: String) {
+        val item = repo.findOneByBarcode(barcode)
+        if (item == null) throw RuntimeException("item not found!")
+        else repo.delete(item)
     }
 }
 

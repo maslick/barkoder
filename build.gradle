@@ -89,6 +89,6 @@ bintray {
     override = true
     pkg {
         repo = 'maven'
-        name = 'collector'
+        name = 'barkoder'
     }
 }

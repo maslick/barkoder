@@ -13,4 +13,4 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - ./gradlew clean bintrayUpload
+  - ./gradlew clean build bintrayUpload

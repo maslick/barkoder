@@ -135,7 +135,7 @@ class IntegrationTest {
 	fun deleteItem() {
 		kogda(service.deleteOne(any())).then { println("deleting item...") }
 		val resp = restTemplate.exchange(
-				"http://localhost:$port/item/123/delete",
+				"http://localhost:$port/item/123",
 				HttpMethod.DELETE,
 				null,
 				object : ParameterizedTypeReference<Resp>() {}
@@ -151,7 +151,7 @@ class IntegrationTest {
 			throw RuntimeException("Error removing item :(")
 		}
 		val resp = restTemplate.exchange(
-				"http://localhost:$port/item/123/delete",
+				"http://localhost:$port/item/123",
 				HttpMethod.DELETE,
 				null,
 				object : ParameterizedTypeReference<Resp>() {}
@@ -164,7 +164,7 @@ class IntegrationTest {
 	fun deleteItemByBarcode() {
 		kogda(service.deleteOneByBarcode(any())).then { println("deleting item by barcode...") }
 		val resp = restTemplate.exchange(
-				"http://localhost:$port/barcode/123/delete",
+				"http://localhost:$port/barcode/123",
 				HttpMethod.DELETE,
 				null,
 				object : ParameterizedTypeReference<Resp>() {}
@@ -180,7 +180,7 @@ class IntegrationTest {
 			throw RuntimeException("Error removing item :(")
 		}
 		val resp = restTemplate.exchange(
-				"http://localhost:$port/barcode/123/delete",
+				"http://localhost:$port/barcode/123",
 				HttpMethod.DELETE,
 				null,
 				object : ParameterizedTypeReference<Resp>() {}

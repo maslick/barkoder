@@ -63,7 +63,7 @@ class BarcoderRestController(val service: IService) {
         else Resp(item, ERROR)
     }
 
-    @DeleteMapping(value = ["/item/{id}/delete"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun deleteItem(@PathVariable id: Int): Resp {
         return try {
             service.deleteOne(id)
@@ -74,7 +74,7 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @DeleteMapping(value = ["/barcode/{barcode}/delete"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun deleteItemByBarcode(@PathVariable barcode: String): Resp {
         return try {
             service.deleteOneByBarcode(barcode)

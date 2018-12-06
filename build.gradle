@@ -93,7 +93,4 @@ bintray {
         licenses = ['MIT']
         vcsUrl = 'https://github.com/maslick/barkoder.git'
     }
-    version {
-        name = "$version"
-    }
 }

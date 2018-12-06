@@ -1,5 +1,6 @@
-package io.maslick.barkoder
+package io.maslick.barkoder.web
 
+import io.maslick.barkoder.*
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +54,7 @@ class IntegrationTest {
 
 	@Test
 	fun testGetOne() {
-		kogda(service.getOneById(any<Int>())).thenReturn(Item(id=123))
+		kogda(service.getOneById(any())).thenReturn(Item(id=123))
 		val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body!!
 		Assert.assertEquals(123, item.id)
 	}

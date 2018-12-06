@@ -33,7 +33,7 @@ apply plugin: 'nebula.source-jar'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'io.maslick'
-version = '0.1-SNAPSHOT'
+version = '0.1'
 sourceCompatibility = 1.8
 
 compileKotlin {
@@ -94,7 +94,7 @@ bintray {
         licenses = ['MIT']
         vcsUrl = 'https://github.com/maslick/barkoder.git'
         version {
-            name = '0.1'
+            name = project.version
         }
     }
 }

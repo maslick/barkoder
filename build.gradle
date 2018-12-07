@@ -31,6 +31,7 @@ apply plugin: 'nebula.maven-publish'
 apply plugin: 'nebula.javadoc-jar'
 apply plugin: 'nebula.source-jar'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'jacoco'
 
 group = 'io.maslick'
 version = '0.1'
@@ -98,3 +99,12 @@ bintray {
         }
     }
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+check.dependsOn jacocoTestReport

@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 }
 
 enum class Status { ERROR, OK }
-data class Resp(val item: Item?, val status: Status)
+data class Response(val item: Item?, val status: Status, val errorMessage: String? = null)
 
 @RestController
 @CrossOrigin
@@ -47,41 +47,41 @@ class BarcoderRestController(val service: IService) {
     }
 
     @PostMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun postItem(@RequestBody item: Item): Resp {
+    fun postItem(@RequestBody item: Item): Response {
         return try {
-            if (service.saveOne(item)) Resp(item, OK)
-            else Resp(item, ERROR)
+            if (service.saveOne(item)) Response(item, OK)
+            else Response(item, ERROR, "item already exists or sth else happened :(")
         } catch (e: Exception) {
             e.printStackTrace()
-            Resp(item, ERROR)
+            Response(item, ERROR, e.message)
         }
     }
 
     @PutMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun putItem(@RequestBody item: Item): Resp {
-        return if (service.updateOne(item)) Resp(item, OK)
-        else Resp(item, ERROR)
+    fun putItem(@RequestBody item: Item): Response {
+        return if (service.updateOne(item)) Response(item, OK)
+        else Response(item, ERROR, "Could not update Item :(")
     }
 
     @DeleteMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun deleteItem(@PathVariable id: Int): Resp {
+    fun deleteItem(@PathVariable id: Int): Response {
         return try {
             service.deleteOne(id)
-            Resp(null, OK)
+            Response(null, OK)
         } catch (e: Exception) {
             e.printStackTrace()
-            Resp(null, ERROR)
+            Response(null, ERROR, e.message)
         }
     }
 
     @DeleteMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun deleteItemByBarcode(@PathVariable barcode: String): Resp {
+    fun deleteItemByBarcode(@PathVariable barcode: String): Response {
         return try {
             service.deleteOneByBarcode(barcode)
-            Resp(null, OK)
+            Response(null, OK)
         } catch (e: Exception) {
             e.printStackTrace()
-            Resp(null, ERROR)
+            Response(null, ERROR, e.message)
         }
     }
 }
@@ -136,6 +136,6 @@ class SwaggerConfig {
     fun api() = Docket(DocumentationType.SWAGGER_2)
             .select()
             .apis(RequestHandlerSelectors.any())
-            .paths(Predicates.not(PathSelectors.regex("/error")))
+            .paths(Predicates.not(PathSelectors.regex("/errorMessage")))
             .build()
 }

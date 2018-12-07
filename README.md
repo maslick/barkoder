@@ -2,7 +2,9 @@
 a minimalistic WMS system
 
 [![Build Status](https://travis-ci.org/maslick/barkoder.svg?branch=master)](https://travis-ci.org/maslick/barkoder)
+[ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)
 
+![barkoder architecture](barkoder.png)
 
 ## Features
 * simple REST API

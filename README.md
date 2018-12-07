@@ -65,7 +65,7 @@ $ java -jar barkoder-0.1.jar
 * Delete an Item by its id: ``DELETE /item/{id}``
 * Delete an Item by its barcode: ``DELETE /barcode/{barcode}``
 
-If REST API is secured with ``Keycloak``, the ``Authorization`` header should be sent with each request:
+If the REST API is secured with ``Keycloak``, an ``Authorization`` header should be present in each request:
 ```
 "Authorization" : "bearer ${KEYCLOAK_TOKEN}"
 ```

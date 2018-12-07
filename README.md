@@ -74,6 +74,7 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
 ```
 
 ## Entity
+``Item``:
 ```
 {
   "id": 1
@@ -84,3 +85,21 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
   "quantity": 1
 }
 ```
+
+``Response``:
+```
+{
+  "item": {
+    "id": 7,
+    "title": "Union Lager",
+    "category": "beer",
+    "description": "Full flavour, medium bitterness",
+    "barcode": "5901234123457",
+    "quantity": 1
+  },
+  "status": "OK",
+  "errorMessage": null
+}
+```
+
+

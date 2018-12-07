@@ -20,7 +20,7 @@ $ ./gradlew clean build
 
 or simply download the artifact from ``bintray``:
 ```
-$ wget https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.1/barkoder-0.1.jar
+$ wget -O barkoder-0.1.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.1/barkoder-0.1.jar
 ```
 
 ## Usage

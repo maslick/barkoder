@@ -62,6 +62,7 @@ $ java -jar barkoder-0.1.jar
 * Get an Item by its id: ``GET /item/{id}``
 * Get an Item by its barcode: ``GET /barcode/{barcode}``
 * Add new Item: ``POST /item``
+* Add multiple Items: ``POST /items``
 * Update an Item: ``PUT /item``
 * Delete an Item by its id: ``DELETE /item/{id}``
 * Delete an Item by its barcode: ``DELETE /barcode/{barcode}``
@@ -89,14 +90,6 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
 ``Response``:
 ```
 {
-  "item": {
-    "id": 7,
-    "title": "Union Lager",
-    "category": "beer",
-    "description": "Full flavour, medium bitterness",
-    "barcode": "5901234123457",
-    "quantity": 1
-  },
   "status": "OK",
   "errorMessage": null
 }

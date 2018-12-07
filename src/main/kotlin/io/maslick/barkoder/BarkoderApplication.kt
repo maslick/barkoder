@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 }
 
 enum class Status { ERROR, OK }
-data class Response(val item: Item?, val status: Status, val errorMessage: String? = null)
+data class Response(val status: Status, val errorMessage: String? = null)
 
 @RestController
 @CrossOrigin
@@ -49,28 +49,39 @@ class BarcoderRestController(val service: IService) {
     @PostMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun postItem(@RequestBody item: Item): Response {
         return try {
-            if (service.saveOne(item)) Response(item, OK)
-            else Response(item, ERROR, "item already exists or sth else happened :(")
+            if (service.saveOne(item)) Response(OK)
+            else Response(ERROR, "item already exists or sth else happened :(")
         } catch (e: Exception) {
             e.printStackTrace()
-            Response(item, ERROR, e.message)
+            Response(ERROR, e.message)
+        }
+    }
+
+    @PostMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    fun postMultipleItems(@RequestBody items: List<Item>): Response {
+        return try {
+            if (service.saveMultiple(items)) Response(OK)
+            else Response(ERROR, "one of the items already exists")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Response(ERROR, e.message)
         }
     }
 
     @PutMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun putItem(@RequestBody item: Item): Response {
-        return if (service.updateOne(item)) Response(item, OK)
-        else Response(item, ERROR, "Could not update Item :(")
+        return if (service.updateOne(item)) Response(OK)
+        else Response(ERROR, "Could not update Item :(")
     }
 
     @DeleteMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun deleteItem(@PathVariable id: Int): Response {
         return try {
             service.deleteOne(id)
-            Response(null, OK)
+            Response(OK)
         } catch (e: Exception) {
             e.printStackTrace()
-            Response(null, ERROR, e.message)
+            Response(ERROR, e.message)
         }
     }
 
@@ -78,10 +89,10 @@ class BarcoderRestController(val service: IService) {
     fun deleteItemByBarcode(@PathVariable barcode: String): Response {
         return try {
             service.deleteOneByBarcode(barcode)
-            Response(null, OK)
+            Response(OK)
         } catch (e: Exception) {
             e.printStackTrace()
-            Response(null, ERROR, e.message)
+            Response(ERROR, e.message)
         }
     }
 }
@@ -91,6 +102,7 @@ interface IService {
     fun getOneById(id: Int): Item?
     fun getOneByBarcode(barcode: String): Item?
     fun saveOne(item: Item): Boolean
+    fun saveMultiple(items: List<Item>): Boolean
     fun updateOne(item: Item): Boolean
     fun deleteOne(id: Int)
     fun deleteOneByBarcode(barcode: String)
@@ -103,8 +115,16 @@ class MyService(val repo: MyRepo): IService {
     override fun getOneByBarcode(barcode: String) = repo.findOneByBarcode(barcode)
 
     override fun saveOne(item: Item): Boolean {
+        if (item.barcode == null) return false
         if (repo.findOneByBarcode(item.barcode!!) != null) return false
         repo.save(item)
+        return true
+    }
+
+    override fun saveMultiple(items: List<Item>): Boolean {
+        if (items.any { it.barcode == null }) return false
+        if (items.any { repo.findOneByBarcode(it.barcode!!) != null }) return false
+        repo.saveAll(items)
         return true
     }
 

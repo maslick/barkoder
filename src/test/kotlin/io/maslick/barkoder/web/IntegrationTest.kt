@@ -37,6 +37,8 @@ class IntegrationTest {
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
 
+    val host = "http://localhost"
+
     @Test
     fun testGetAll() {
         kogda(service.getAll()).thenReturn(listOf(Item(id = 1), Item(id = 2)))
@@ -55,7 +57,7 @@ class IntegrationTest {
     @Test
     fun testGetOne() {
         kogda(service.getOneById(any())).thenReturn(Item(id=123))
-        val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body!!
+        val item = restTemplate.getForEntity("$host:$port/item/123", Item::class.java).body!!
         Assert.assertEquals(123, item.id)
     }
 
@@ -63,14 +65,14 @@ class IntegrationTest {
     fun testGetNull() {
         kogda(service.getOneById(any())).thenReturn(null)
 
-        val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body
+        val item = restTemplate.getForEntity("$host:$port/item/123", Item::class.java).body
         Assert.assertNull(item)
     }
 
     @Test
     fun testGetBarcode() {
         kogda(service.getOneByBarcode(any())).thenReturn(Item(id=456, barcode = "123456"))
-        val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body!!
+        val item = restTemplate.getForEntity("$host:$port/barcode/123456", Item::class.java).body!!
         Assert.assertEquals(456, item.id)
         Assert.assertEquals("123456", item.barcode)
     }
@@ -78,14 +80,14 @@ class IntegrationTest {
     @Test
     fun testGetNullBarcode() {
         kogda(service.getOneByBarcode(any())).thenReturn(null)
-        val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body
+        val item = restTemplate.getForEntity("$host:$port/barcode/123456", Item::class.java).body
         Assert.assertNull(item)
     }
 
     @Test
     fun testPostOk() {
         kogda(service.saveOne(any())).thenReturn(true)
-        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        val resp = restTemplate.postForEntity("$host:$port/item", Item(), Response::class.java).body!!
         Assert.assertEquals(Status.OK, resp.status)
         Assert.assertNull(resp.errorMessage)
     }
@@ -93,7 +95,23 @@ class IntegrationTest {
     @Test
     fun testPostAlreadyExists() {
         kogda(service.saveOne(any())).thenReturn(false)
-        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        val resp = restTemplate.postForEntity("$host:$port/item", Item(), Response::class.java).body!!
+        Assert.assertEquals(Status.ERROR, resp.status)
+        Assert.assertNotNull(resp.errorMessage)
+    }
+
+    @Test
+    fun testPostMultipleOk() {
+        kogda(service.saveMultiple(any())).thenReturn(true)
+        val resp = restTemplate.postForEntity("$host:$port/items", listOf<Item>(), Response::class.java).body!!
+        Assert.assertEquals(Status.OK, resp.status)
+        Assert.assertNull(resp.errorMessage)
+    }
+
+    @Test
+    fun testPostMultipleAlreadyExists() {
+        kogda(service.saveMultiple(any())).thenReturn(false)
+        val resp = restTemplate.postForEntity("$host:$port/items", listOf<Item>(), Response::class.java).body!!
         Assert.assertEquals(Status.ERROR, resp.status)
         Assert.assertNotNull(resp.errorMessage)
     }
@@ -104,7 +122,7 @@ class IntegrationTest {
             println("saving to database...")
             throw RuntimeException("database is down!!!")
         }
-        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        val resp = restTemplate.postForEntity("$host:$port/item", Item(), Response::class.java).body!!
         Assert.assertEquals(Status.ERROR, resp.status)
         Assert.assertNotNull(resp.errorMessage)
     }
@@ -113,13 +131,12 @@ class IntegrationTest {
     fun testUpdateItemOk() {
         kogda(service.updateOne(any())).thenReturn(true)
         val resp = restTemplate.exchange(
-                "http://localhost:$port/item",
+                "$host:$port/item",
                 HttpMethod.PUT,
                 HttpEntity(Item(123)),
                 object : ParameterizedTypeReference<Response>() {}
         ).body!!
         Assert.assertEquals(Status.OK, resp.status)
-        Assert.assertEquals(123, resp.item!!.id)
         Assert.assertNull(resp.errorMessage)
     }
 
@@ -127,13 +144,12 @@ class IntegrationTest {
     fun testUpdateItemError() {
         kogda(service.updateOne(any())).thenReturn(false)
         val resp = restTemplate.exchange(
-                "http://localhost:$port/item",
+                "$host:$port/item",
                 HttpMethod.PUT,
                 HttpEntity(Item(123)),
                 object : ParameterizedTypeReference<Response>() {}
         ).body!!
         Assert.assertEquals(Status.ERROR, resp.status)
-        Assert.assertEquals(123, resp.item!!.id)
         Assert.assertNotNull(resp.errorMessage)
     }
 
@@ -141,7 +157,7 @@ class IntegrationTest {
     fun testDeleteItemOk() {
         kogda(service.deleteOne(any())).then { println("deleting item...") }
         val resp = restTemplate.exchange(
-                "http://localhost:$port/item/123",
+                "$host:$port/item/123",
                 HttpMethod.DELETE,
                 null,
                 object : ParameterizedTypeReference<Response>() {}
@@ -158,7 +174,7 @@ class IntegrationTest {
             throw RuntimeException("Error removing item :(")
         }
         val resp = restTemplate.exchange(
-                "http://localhost:$port/item/123",
+                "$host:$port/item/123",
                 HttpMethod.DELETE,
                 null,
                 object : ParameterizedTypeReference<Response>() {}
@@ -172,7 +188,7 @@ class IntegrationTest {
     fun testDeleteItemByBarcodeOk() {
         kogda(service.deleteOneByBarcode(any())).then { println("deleting item by barcode...") }
         val resp = restTemplate.exchange(
-                "http://localhost:$port/barcode/123",
+                "$host:$port/barcode/123",
                 HttpMethod.DELETE,
                 null,
                 object : ParameterizedTypeReference<Response>() {}
@@ -189,7 +205,7 @@ class IntegrationTest {
             throw RuntimeException("Error removing item :(")
         }
         val resp = restTemplate.exchange(
-                "http://localhost:$port/barcode/123",
+                "$host:$port/barcode/123",
                 HttpMethod.DELETE,
                 null,
                 object : ParameterizedTypeReference<Response>() {}

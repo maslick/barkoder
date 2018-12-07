@@ -30,165 +30,174 @@ import kotlin.reflect.KClass
 @ContextConfiguration(classes = [MyTestConfig::class])
 class IntegrationTest {
 
-	@LocalServerPort private var port: Int? = null
-	@MockBean lateinit var repo: MyRepo
-	@MockBean lateinit var service: IService
+    @LocalServerPort private var port: Int? = null
+    @MockBean lateinit var repo: MyRepo
+    @MockBean lateinit var service: IService
 
-	@Autowired
-	private lateinit var restTemplate: TestRestTemplate
+    @Autowired
+    private lateinit var restTemplate: TestRestTemplate
 
-	@Test
-	fun testGetAll() {
-		kogda(service.getAll()).thenReturn(listOf(Item(id = 1), Item(id = 2)))
+    @Test
+    fun testGetAll() {
+        kogda(service.getAll()).thenReturn(listOf(Item(id = 1), Item(id = 2)))
 
-		val items = restTemplate.exchange(
-				"http://localhost:$port/items",
-				HttpMethod.GET,
-				null,
-				object : ParameterizedTypeReference<List<Item>>() {}
-		).body!!
-		Assert.assertEquals(2, items.size)
-		Assert.assertEquals(1, items.first().id)
-		Assert.assertEquals(2, items.last().id)
-	}
+        val items = restTemplate.exchange(
+                "http://localhost:$port/items",
+                HttpMethod.GET,
+                null,
+                object : ParameterizedTypeReference<List<Item>>() {}
+        ).body!!
+        Assert.assertEquals(2, items.size)
+        Assert.assertEquals(1, items.first().id)
+        Assert.assertEquals(2, items.last().id)
+    }
 
-	@Test
-	fun testGetOne() {
-		kogda(service.getOneById(any())).thenReturn(Item(id=123))
-		val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body!!
-		Assert.assertEquals(123, item.id)
-	}
+    @Test
+    fun testGetOne() {
+        kogda(service.getOneById(any())).thenReturn(Item(id=123))
+        val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body!!
+        Assert.assertEquals(123, item.id)
+    }
 
-	@Test
-	fun testGetNull() {
-		kogda(service.getOneById(any())).thenReturn(null)
+    @Test
+    fun testGetNull() {
+        kogda(service.getOneById(any())).thenReturn(null)
 
-		val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body
-		Assert.assertNull(item)
-	}
+        val item = restTemplate.getForEntity("http://localhost:$port/item/123", Item::class.java).body
+        Assert.assertNull(item)
+    }
 
-	@Test
-	fun testGetBarcode() {
-		kogda(service.getOneByBarcode(any())).thenReturn(Item(id=456, barcode = "123456"))
-		val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body!!
-		Assert.assertEquals(456, item.id)
-		Assert.assertEquals("123456", item.barcode)
-	}
+    @Test
+    fun testGetBarcode() {
+        kogda(service.getOneByBarcode(any())).thenReturn(Item(id=456, barcode = "123456"))
+        val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body!!
+        Assert.assertEquals(456, item.id)
+        Assert.assertEquals("123456", item.barcode)
+    }
 
-	@Test
-	fun testGetNullBarcode() {
-		kogda(service.getOneByBarcode(any())).thenReturn(null)
-		val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body
-		Assert.assertNull(item)
-	}
+    @Test
+    fun testGetNullBarcode() {
+        kogda(service.getOneByBarcode(any())).thenReturn(null)
+        val item = restTemplate.getForEntity("http://localhost:$port/barcode/123456", Item::class.java).body
+        Assert.assertNull(item)
+    }
 
-	@Test
-	fun testPostBarcodeOk() {
-		kogda(service.saveOne(any())).thenReturn(true)
-		val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Resp::class.java).body!!
-		Assert.assertEquals(Status.OK, resp.status)
-	}
+    @Test
+    fun testPostOk() {
+        kogda(service.saveOne(any())).thenReturn(true)
+        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        Assert.assertEquals(Status.OK, resp.status)
+        Assert.assertNull(resp.errorMessage)
+    }
 
-	@Test
-	fun testPostBarcodeAlreadyExists() {
-		kogda(service.saveOne(any())).thenReturn(false)
-		val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Resp::class.java).body!!
-		Assert.assertEquals(Status.ERROR, resp.status)
-	}
+    @Test
+    fun testPostAlreadyExists() {
+        kogda(service.saveOne(any())).thenReturn(false)
+        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        Assert.assertEquals(Status.ERROR, resp.status)
+        Assert.assertNotNull(resp.errorMessage)
+    }
 
-	@Test
-	fun testPostBarcodeWithException() {
-		kogda(service.saveOne(any())).then {
-			println("saving to database...")
-			throw RuntimeException("database is down!!!")
-		}
-		val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Resp::class.java).body!!
-		Assert.assertEquals(Status.ERROR, resp.status)
-	}
+    @Test
+    fun testPostWithException() {
+        kogda(service.saveOne(any())).then {
+            println("saving to database...")
+            throw RuntimeException("database is down!!!")
+        }
+        val resp = restTemplate.postForEntity("http://localhost:$port/item", Item(), Response::class.java).body!!
+        Assert.assertEquals(Status.ERROR, resp.status)
+        Assert.assertNotNull(resp.errorMessage)
+    }
 
-	@Test
-	fun testUpdateItemOk() {
-		kogda(service.updateOne(any())).thenReturn(true)
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/item",
-				HttpMethod.PUT,
-				HttpEntity(Item(123)),
-				object : ParameterizedTypeReference<Resp>() {}
-		).body!!
-		Assert.assertEquals(Status.OK, resp.status)
-		Assert.assertEquals(123, resp.item!!.id)
-	}
+    @Test
+    fun testUpdateItemOk() {
+        kogda(service.updateOne(any())).thenReturn(true)
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/item",
+                HttpMethod.PUT,
+                HttpEntity(Item(123)),
+                object : ParameterizedTypeReference<Response>() {}
+        ).body!!
+        Assert.assertEquals(Status.OK, resp.status)
+        Assert.assertEquals(123, resp.item!!.id)
+        Assert.assertNull(resp.errorMessage)
+    }
 
-	@Test
-	fun testUpdateItemError() {
-		kogda(service.updateOne(any())).thenReturn(false)
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/item",
-				HttpMethod.PUT,
-				HttpEntity(Item(123)),
-				object : ParameterizedTypeReference<Resp>() {}
-		).body!!
-		Assert.assertEquals(Status.ERROR, resp.status)
-		Assert.assertEquals(123, resp.item!!.id)
-	}
+    @Test
+    fun testUpdateItemError() {
+        kogda(service.updateOne(any())).thenReturn(false)
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/item",
+                HttpMethod.PUT,
+                HttpEntity(Item(123)),
+                object : ParameterizedTypeReference<Response>() {}
+        ).body!!
+        Assert.assertEquals(Status.ERROR, resp.status)
+        Assert.assertEquals(123, resp.item!!.id)
+        Assert.assertNotNull(resp.errorMessage)
+    }
 
-	@Test
-	fun deleteItem() {
-		kogda(service.deleteOne(any())).then { println("deleting item...") }
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/item/123",
-				HttpMethod.DELETE,
-				null,
-				object : ParameterizedTypeReference<Resp>() {}
-		)
-		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
-		Assert.assertEquals(Status.OK, resp.body!!.status)
-	}
+    @Test
+    fun testDeleteItemOk() {
+        kogda(service.deleteOne(any())).then { println("deleting item...") }
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/item/123",
+                HttpMethod.DELETE,
+                null,
+                object : ParameterizedTypeReference<Response>() {}
+        )
+        Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+        Assert.assertEquals(Status.OK, resp.body!!.status)
+        Assert.assertNull(resp.body!!.errorMessage)
+    }
 
-	@Test
-	fun deleteItemThatsNotInDb() {
-		kogda(service.deleteOne(any())).then {
-			println("deleting item...")
-			throw RuntimeException("Error removing item :(")
-		}
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/item/123",
-				HttpMethod.DELETE,
-				null,
-				object : ParameterizedTypeReference<Resp>() {}
-		)
-		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
-		Assert.assertEquals(Status.ERROR, resp.body!!.status)
-	}
+    @Test
+    fun testDeleteItemNotInDb() {
+        kogda(service.deleteOne(any())).then {
+            println("deleting item...")
+            throw RuntimeException("Error removing item :(")
+        }
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/item/123",
+                HttpMethod.DELETE,
+                null,
+                object : ParameterizedTypeReference<Response>() {}
+        )
+        Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+        Assert.assertEquals(Status.ERROR, resp.body!!.status)
+        Assert.assertNotNull(resp.body!!.errorMessage)
+    }
 
-	@Test
-	fun deleteItemByBarcode() {
-		kogda(service.deleteOneByBarcode(any())).then { println("deleting item by barcode...") }
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/barcode/123",
-				HttpMethod.DELETE,
-				null,
-				object : ParameterizedTypeReference<Resp>() {}
-		)
-		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
-		Assert.assertEquals(Status.OK, resp.body!!.status)
-	}
+    @Test
+    fun testDeleteItemByBarcodeOk() {
+        kogda(service.deleteOneByBarcode(any())).then { println("deleting item by barcode...") }
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/barcode/123",
+                HttpMethod.DELETE,
+                null,
+                object : ParameterizedTypeReference<Response>() {}
+        )
+        Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+        Assert.assertEquals(Status.OK, resp.body!!.status)
+        Assert.assertNull(resp.body!!.errorMessage)
+    }
 
-	@Test
-	fun deleteItemByBarcodeThatsNotInDb() {
-		kogda(service.deleteOneByBarcode(any())).then {
-			println("deleting item by barcode...")
-			throw RuntimeException("Error removing item :(")
-		}
-		val resp = restTemplate.exchange(
-				"http://localhost:$port/barcode/123",
-				HttpMethod.DELETE,
-				null,
-				object : ParameterizedTypeReference<Resp>() {}
-		)
-		Assert.assertEquals(HttpStatus.OK, resp.statusCode)
-		Assert.assertEquals(Status.ERROR, resp.body!!.status)
-	}
+    @Test
+    fun deleteItemByBarcodeNotInDb() {
+        kogda(service.deleteOneByBarcode(any())).then {
+            println("deleting item by barcode...")
+            throw RuntimeException("Error removing item :(")
+        }
+        val resp = restTemplate.exchange(
+                "http://localhost:$port/barcode/123",
+                HttpMethod.DELETE,
+                null,
+                object : ParameterizedTypeReference<Response>() {}
+        )
+        Assert.assertEquals(HttpStatus.OK, resp.statusCode)
+        Assert.assertEquals(Status.ERROR, resp.body!!.status)
+        Assert.assertNotNull(resp.body!!.errorMessage)
+    }
 
 }
 

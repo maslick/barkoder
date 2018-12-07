@@ -65,8 +65,13 @@ $ java -jar barkoder-0.1.jar
 * Delete an Item by its id: ``DELETE /item/{id}``
 * Delete an Item by its barcode: ``DELETE /barcode/{barcode}``
 
+If REST API is secured with ``Keycloak``, the ``Authorization`` header should be sent with each request:
+```
+"Authorization" : "bearer ${KEYCLOAK_TOKEN}"
+```
+
 ## Entity
-All requests shall use the ``application/json`` MIME type (UTF-8).
+Use the ``application/json`` MIME type (UTF-8).
 
 ```
 {

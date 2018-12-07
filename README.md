@@ -24,7 +24,7 @@ $ wget https://bintray.com/maslick/maven/download_file?file_path=io/maslick/bark
 ```
 
 ## Usage
-Configure ``application.properties``:
+Create the file ``application.properties`` and put in the same directory as the jar:
 ```
 # Db
 spring.datasource.platform=postgres

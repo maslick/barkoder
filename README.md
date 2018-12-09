@@ -39,17 +39,17 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=update
 
 # OAuth2.0
-keycloak.auth-server-url=${KEYCLOAK_URL}:${KEYCLOAK_PORT}/auth
-keycloak.resource=${CLIENT_ID}
-keycloak.realm=${REALM_NAME}
+keycloak.auth-server-url=${KCHOST}/auth
+keycloak.resource=${CLIENT}
+keycloak.realm=${REALM}
 keycloak.bearer-only=true
 keycloak.ssl-required=external
-keycloak.credentials.secret=${KEYCLOAK_CLIENT_SERCET}
+keycloak.credentials.secret=${CLIENT_SECRET}
 keycloak.cors=true
-keycloak.enabled=true
+keycloak.enabled=${KC_ENABLED:false}
 
-keycloak.securityConstraints[0].securityCollections[0].name=secured resource
-keycloak.securityConstraints[0].authRoles[0]=${ROLE}
+keycloak.securityConstraints[0].securityCollections[0].name=secured stuff
+keycloak.securityConstraints[0].authRoles[0]=${CLIENT_ROLE}
 keycloak.securityConstraints[0].securityCollections[0].patterns[0]=/*
 ```
 Run the service:

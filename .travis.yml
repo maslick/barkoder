@@ -32,13 +32,11 @@ jobs:
 
     - stage: snapshot
       name: "Pushing to snapshot repo (artifactory)"
-      before_install: pwd && ls -l
-      script: ./gradlew artifactoryPublish -x test -Dsnapshot=true
+      script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
 
     - stage: release
       name: "Pushing to release repo (bintray)"
-      before_install: pwd && ls -l
-      script: ./gradlew bintrayUpload -x test
+      script: ./gradlew build bintrayUpload -x test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

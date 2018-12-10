@@ -36,7 +36,7 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: 'jacoco'
 
 group = 'io.maslick'
-version = '0.1' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+version = '0.2' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 sourceCompatibility = 1.8
 
 compileKotlin {

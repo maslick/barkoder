@@ -20,9 +20,9 @@ cache:
 stages:
   - name: build
   - name: snapshot
-    if: branch = release AND type IN (push)
-  - name: release
     if: branch = master AND type IN (push)
+  - name: release
+    if: branch = release AND type IN (push)
 
 jobs:
   include:

@@ -4,6 +4,9 @@ a minimalistic WMS system
 [![Build Status](https://travis-ci.org/maslick/barkoder.svg?branch=master)](https://travis-ci.org/maslick/barkoder)
 [![codecov](https://codecov.io/gh/maslick/barkoder/branch/master/graph/badge.svg)](https://codecov.io/gh/maslick/barkoder)
 [ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+
 
 ![barkoder architecture](barkoder.png)
 

@@ -83,21 +83,33 @@ dependencyManagement {
     }
 }
 
+ext{
+    bintrayUser = System.getenv('BINTRAY_USER')
+    bintrayKey = System.getenv('BINTRAY_KEY')
+    buildNumber = System.getenv('TRAVIS_BUILD_NUMBER')
+}
+
 bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
+    user = bintrayUser
+    key = bintrayKey
+    buildNumber = buildNumber
     publications = ['nebula']
-    publish = true
-    override = true
+    
     pkg {
         repo = 'maven'
         name = 'barkoder'
+        userOrg = 'Maslick & Sons'
         licenses = ['MIT']
         vcsUrl = 'https://github.com/maslick/barkoder.git'
         version {
             name = project.version
+            desc = "build ${buildNumber}"
+            released = new Date()
         }
     }
+
+    publish = true
+    override = true
 }
 
 jacocoTestReport {

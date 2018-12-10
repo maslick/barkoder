@@ -1,4 +1,6 @@
 language: java
+install: true
+sudo: false
 
 jdk:
   - oraclejdk8
@@ -6,14 +8,37 @@ jdk:
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
+before_install:
+  - chmod +x gradlew
+
 cache:
   directories:
     - $HOME/.m2
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-script:
-  - ./gradlew clean build bintrayUpload
+stages:
+  - name: build
+  - name: snapshot
+    if: branch = master AND type IN (push)
+  - name: release
+    if: branch = release AND type IN (push)
+
+jobs:
+  include:
+    - stage: build
+      name: "Building"
+      script: ./gradlew build
+
+    - stage: snapshot
+      name: "Pushing to snapshot repo (artifactory)"
+      before_install: pwd && ls -l
+      script: ./gradlew artifactoryPublish -x test -Dsnapshot=true
+
+    - stage: release
+      name: "Pushing to release repo (bintray)"
+      before_install: pwd && ls -l
+      script: ./gradlew bintrayUpload -x test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

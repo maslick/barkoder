@@ -98,7 +98,6 @@ bintray {
     pkg {
         repo = 'maven'
         name = 'barkoder'
-        userOrg = 'Maslick & Sons'
         licenses = ['MIT']
         vcsUrl = 'https://github.com/maslick/barkoder.git'
         version {

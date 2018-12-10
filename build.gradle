@@ -15,8 +15,9 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath("com.netflix.nebula:nebula-publishing-plugin:5.1.0")
+        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
+        classpath("org.jfrog.buildinfo:build-info-extractor-gradle:4.7.2")
     }
 }
 
@@ -31,10 +32,11 @@ apply plugin: 'nebula.maven-publish'
 apply plugin: 'nebula.javadoc-jar'
 apply plugin: 'nebula.source-jar'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.jfrog.artifactory"
 apply plugin: 'jacoco'
 
 group = 'io.maslick'
-version = '0.1'
+version = '0.1' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 sourceCompatibility = 1.8
 
 compileKotlin {
@@ -89,12 +91,37 @@ ext{
     buildNumber = System.getenv('TRAVIS_BUILD_NUMBER')
 }
 
+artifactory {
+    contextUrl = 'http://oss.jfrog.org'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = bintrayUser
+            password = bintrayKey
+        }
+        defaults {
+            publications('nebula')
+            publishArtifacts = true
+            publishPom = true
+            properties = [
+                    'build.number': buildNumber,
+                    'build.name': 'barkoder'
+            ]
+        }
+    }
+    resolve {
+        repoKey = 'jcenter'
+    }
+    clientConfig.info.setBuildNumber(buildNumber)
+    clientConfig.info.setBuildName('barkoder')
+}
+
 bintray {
     user = bintrayUser
     key = bintrayKey
     buildNumber = buildNumber
     publications = ['nebula']
-    
+
     pkg {
         repo = 'maven'
         name = 'barkoder'

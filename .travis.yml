@@ -19,6 +19,8 @@ cache:
 
 stages:
   - name: build
+  - name: snapshot
+    if: branch = release AND type IN (push)
   - name: release
     if: branch = master AND type IN (push)
 
@@ -27,8 +29,14 @@ jobs:
     - stage: build
       name: "Building"
       script: ./gradlew build
+
+    - stage: snapshot
+      name: "Pushing to snapshot repo (artifactory)"
+      before_install: pwd && ls -l
+      script: ./gradlew artifactoryPublish -x test -Dsnapshot=true
+
     - stage: release
-      name: "Pushing to bintray"
+      name: "Pushing to release repo (bintray)"
       before_install: pwd && ls -l
       script: ./gradlew bintrayUpload -x test
 

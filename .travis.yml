@@ -1,4 +1,6 @@
 language: java
+install: true
+sudo: false
 
 jdk:
   - oraclejdk8
@@ -6,14 +8,26 @@ jdk:
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
+before_install:
+  - chmod +x gradlew
+
 cache:
   directories:
     - $HOME/.m2
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-script:
-  - ./gradlew clean build bintrayUpload
+stages:
+  - name: build
+  - name: release
+    if: branch = master
+
+jobs:
+  include:
+    - stage: build
+      script: ./gradlew build
+    - stage: release
+      script: ./gradlew bintrayUpload -x test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

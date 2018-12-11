@@ -45,10 +45,11 @@ deploy:
   provider: heroku
   api_key:
     secure: vazHZvOHg7EoHjw9fKI2R223nZz4QYRP/dguDpXzGIL1gw3CDkFr+2r+N9/ii2HDkfcmUtOf6Q9ETfXGVKlPUE1yx3MVfUNZGyLD8HVf6OB8x/R9CCrgV0gkCogppmZrJNJ6eE5zMtGenrj6XZB5LLBYgEgCRQeS7Jtsm9ywyzJAGO6nsBomztj59FsR13Goim4Wi96496K8sYk/jkacuaStsaWxJ+7jpoTtXHdsfAZjroxhupaucl6aBeGdzuoAThgHT4XDYWdTN6TPWkuCVq9C3zi9eLBgo+WjC7fkxmcF24vAiNnn0tpWaJ3yslRNpIneGUQfXSPOmVNM2tkESU9WPTHCHh5bNfQ/2WZ01Tu6qrwV43df7HPRJfeROz80wgJvbI1IwI9yoXj3drdnM7/eSOYrwxbHlR3RYWSUf0yJYnlpKdIIvKMVhCiB/tiivd/+WILsHvPLqmBzBNeqytSAH64pjVqITWvoCqzbWzI3s9umH7n1sMtueuu/zFhNTeh3P3xZkzP+jPVKFoos55uG1TEyTIAZNk2gPrO1cddv07LU6j3v0NZR+OQaSeCFC/aVENJ3lnGqKBxWpaFdjoh50m3ouI4TpKhPV5UrL649igPDdQ2vOUfaDI3sWQcXBoyHmVdlJzmP1p0U5n2/4UnJdUjZUzdwn5EMTPSXHLE=
-  app: barkoder
+  app:
+    master: barkoder-dev
+    release: barkoder
   on:
     repo: maslick/barkoder
-    branch: release
   run:
     - restart
   skip_cleanup: true

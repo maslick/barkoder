@@ -44,7 +44,6 @@ jobs:
     - stage: snapshot
       name: "Pushing to snapshot repo (artifactory)"
       script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
-      deploy:
 
     - stage: release
       name: "Pushing to release repo (bintray)"

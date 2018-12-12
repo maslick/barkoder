@@ -2,12 +2,12 @@ package io.maslick.barkoder
 
 
 import com.google.common.base.Predicates
-import io.maslick.barkoder.Status.*
+import io.maslick.barkoder.Status.ERROR
+import io.maslick.barkoder.Status.OK
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.builders.PathSelectors
@@ -31,22 +31,22 @@ data class Response(val status: Status, val errorMessage: String? = null)
 @CrossOrigin
 class BarcoderRestController(val service: IService) {
 
-    @GetMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/items")
     fun getAllItems(): List<Item> {
         return service.getAll()
     }
 
-    @GetMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/item/{id}")
     fun getItem(@PathVariable id: Int): Item? {
         return service.getOneById(id)
     }
 
-    @GetMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/barcode/{barcode}")
     fun getItemByBarcode(@PathVariable barcode: String): Item? {
         return service.getOneByBarcode(barcode)
     }
 
-    @PostMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping("/item")
     fun postItem(@RequestBody item: Item): Response {
         return try {
             if (service.saveOne(item)) Response(OK)
@@ -57,7 +57,7 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @PostMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping("/items")
     fun postMultipleItems(@RequestBody items: List<Item>): Response {
         return try {
             if (service.saveMultiple(items)) Response(OK)
@@ -68,13 +68,13 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @PutMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PutMapping("/item")
     fun putItem(@RequestBody item: Item): Response {
         return if (service.updateOne(item)) Response(OK)
         else Response(ERROR, "Could not update Item :(")
     }
 
-    @DeleteMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping("/item/{id}")
     fun deleteItem(@PathVariable id: Int): Response {
         return try {
             service.deleteOne(id)
@@ -85,7 +85,7 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @DeleteMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping("/barcode/{barcode}")
     fun deleteItemByBarcode(@PathVariable barcode: String): Response {
         return try {
             service.deleteOneByBarcode(barcode)

@@ -117,9 +117,21 @@ class DatabaseTest {
 
         val inserted = service.getOneByBarcode("1234567890")!!
         inserted.title = "edited"
-        service.updateOne(inserted)
-
+        Assert.assertTrue(service.updateOne(inserted))
         Assert.assertEquals("edited", service.getOneByBarcode("1234567890")!!.title)
+    }
+
+    @Test
+    fun updateItemWithExistingBarcode() {
+        val inserted1 = em.persistFlushFind(testItem1)
+        val inserted2 = em.persistFlushFind(testItem2)
+        inserted2.barcode = inserted1.barcode
+        val updated = service.updateOne(inserted2)
+        Assert.assertFalse(updated)
+
+        // save with valid barcode
+        inserted2.barcode = "test"
+        Assert.assertTrue(service.updateOne(inserted2))
     }
 
     @Test
@@ -136,15 +148,6 @@ class DatabaseTest {
         Assert.assertNull(service.getOneById(inserted.id!!))
     }
 
-    @Test
-    fun updateItemWithExistingBarcode() {
-        val inserted1 = em.persistFlushFind(testItem1)
-        val inserted2 = em.persistFlushFind(testItem2)
-        inserted2.barcode = inserted1.barcode
-        val updated = service.updateOne(inserted2)
-
-        Assert.assertFalse(updated)
-    }
 }
 
 @TestConfiguration

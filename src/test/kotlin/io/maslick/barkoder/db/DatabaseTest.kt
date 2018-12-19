@@ -86,6 +86,8 @@ class DatabaseTest {
         Assert.assertEquals(testItem2.description, found2.description)
         Assert.assertEquals(testItem2.barcode, found2.barcode)
         Assert.assertEquals(testItem2.quantity, found2.quantity)
+
+        Assert.assertEquals(2, service.getAll().size)
     }
 
     @Test

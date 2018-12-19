@@ -123,15 +123,12 @@ class DatabaseTest {
 
     @Test
     fun updateItemWithExistingBarcode() {
-        val inserted1 = em.persistFlushFind(testItem1)
-        val inserted2 = em.persistFlushFind(testItem2)
-        inserted2.barcode = inserted1.barcode
-        val updated = service.updateOne(inserted2)
-        Assert.assertFalse(updated)
+        service.saveOne(Item(title = "1", barcode = "1"))
+        service.saveOne(Item(title = "2", barcode = "2"))
 
-        // save with valid barcode
-        inserted2.barcode = "test"
-        Assert.assertTrue(service.updateOne(inserted2))
+        Assert.assertFalse(service.updateOne(Item(title = "2", barcode = "1")))
+        Assert.assertEquals(1, repo.findByBarcode("1").size)
+        Assert.assertEquals(1, repo.findByBarcode("2").size)
     }
 
     @Test

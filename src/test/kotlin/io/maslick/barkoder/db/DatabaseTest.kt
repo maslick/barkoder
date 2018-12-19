@@ -135,6 +135,16 @@ class DatabaseTest {
         service.deleteOneByBarcode(inserted.barcode!!)
         Assert.assertNull(service.getOneById(inserted.id!!))
     }
+
+    @Test
+    fun updateItemWithExistingBarcode() {
+        val inserted1 = em.persistFlushFind(testItem1)
+        val inserted2 = em.persistFlushFind(testItem2)
+        inserted2.barcode = inserted1.barcode
+        val updated = service.updateOne(inserted2)
+
+        Assert.assertFalse(updated)
+    }
 }
 
 @TestConfiguration

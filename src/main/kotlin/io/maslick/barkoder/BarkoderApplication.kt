@@ -112,25 +112,28 @@ interface IService {
 class MyService(val repo: MyRepo): IService {
     override fun getAll() = repo.findAll()
     override fun getOneById(id: Int) = repo.findById(id).orElse(null)
-    override fun getOneByBarcode(barcode: String) = repo.findOneByBarcode(barcode)
+    override fun getOneByBarcode(barcode: String) = repo.findByBarcode(barcode).firstOrNull()
 
     override fun saveOne(item: Item): Boolean {
         if (item.barcode == null) return false
-        if (repo.findOneByBarcode(item.barcode!!) != null) return false
+        if (repo.findByBarcode(item.barcode!!).isNotEmpty()) return false
         repo.save(item)
         return true
     }
 
     override fun saveMultiple(items: List<Item>): Boolean {
         if (items.any { it.barcode == null }) return false
-        if (items.any { repo.findOneByBarcode(it.barcode!!) != null }) return false
+        if (items.any { repo.findByBarcode(it.barcode!!).isNotEmpty() }) return false
         repo.saveAll(items)
         return true
     }
 
     override fun updateOne(item: Item): Boolean {
+        if (item.id == null) return false
+        if (item.barcode == null) return false
         if (!repo.existsById(item.id!!)) return false
-        if (repo.findOneByBarcode(item.barcode!!) != null) return false
+        if (repo.findByBarcode(item.barcode!!).isEmpty()) return false
+        if (repo.findByBarcode(item.barcode!!).size > 1) return false
         repo.save(item)
         return true
     }
@@ -142,7 +145,7 @@ class MyService(val repo: MyRepo): IService {
     }
 
     override fun deleteOneByBarcode(barcode: String) {
-        val item = repo.findOneByBarcode(barcode)
+        val item = repo.findByBarcode(barcode).firstOrNull()
         if (item == null) throw RuntimeException("item not found!")
         else repo.delete(item)
     }

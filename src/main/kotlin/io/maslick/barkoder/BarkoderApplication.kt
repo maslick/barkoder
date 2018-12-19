@@ -131,11 +131,11 @@ class MyService(val repo: MyRepo): IService {
     override fun updateOne(item: Item): Boolean {
         if (item.id == null || item.barcode == null) return false
         if (!repo.existsById(item.id!!)) return false
-        val itemsWithThisBarcode = repo.findByBarcode(item.barcode!!)
-        if (itemsWithThisBarcode.size == 1 && itemsWithThisBarcode[0].id == item.id) {
-            repo.save(item)
-            return true
-        } else return false
+
+        if (repo.findByBarcode(item.barcode!!).any { it.id != item.id }) return false
+
+        repo.save(item)
+        return true
     }
 
     override fun deleteOne(id: Int) {

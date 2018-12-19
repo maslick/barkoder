@@ -129,7 +129,7 @@ class MyService(val repo: MyRepo): IService {
     }
 
     override fun updateOne(item: Item): Boolean {
-        if (repo.existsById(item.id!!)) return false
+        if (!repo.existsById(item.id!!)) return false
         if (repo.findOneByBarcode(item.barcode!!) != null) return false
         repo.save(item)
         return true

@@ -15,6 +15,7 @@ a minimalistic WMS system
 * OAuth2.0 by Keycloak
 * written in Kotlin
 * leverages SpringBoot v2
+* Android [client](https://github.com/maslick/kodermobilj)
 
 ## Installation
 ```

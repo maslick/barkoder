@@ -86,6 +86,8 @@ class DatabaseTest {
         Assert.assertEquals(testItem2.description, found2.description)
         Assert.assertEquals(testItem2.barcode, found2.barcode)
         Assert.assertEquals(testItem2.quantity, found2.quantity)
+
+        Assert.assertEquals(2, service.getAll().size)
     }
 
     @Test
@@ -117,9 +119,18 @@ class DatabaseTest {
 
         val inserted = service.getOneByBarcode("1234567890")!!
         inserted.title = "edited"
-        service.updateOne(inserted)
-
+        Assert.assertTrue(service.updateOne(inserted))
         Assert.assertEquals("edited", service.getOneByBarcode("1234567890")!!.title)
+    }
+
+    @Test
+    fun updateItemWithExistingBarcode() {
+        service.saveOne(Item(title = "1", barcode = "1"))
+        service.saveOne(Item(title = "2", barcode = "2"))
+
+        Assert.assertFalse(service.updateOne(Item(title = "2", barcode = "1")))
+        Assert.assertEquals(1, repo.findByBarcode("1").size)
+        Assert.assertEquals(1, repo.findByBarcode("2").size)
     }
 
     @Test
@@ -135,6 +146,7 @@ class DatabaseTest {
         service.deleteOneByBarcode(inserted.barcode!!)
         Assert.assertNull(service.getOneById(inserted.id!!))
     }
+
 }
 
 @TestConfiguration

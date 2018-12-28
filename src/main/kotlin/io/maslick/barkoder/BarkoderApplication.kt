@@ -2,12 +2,14 @@ package io.maslick.barkoder
 
 
 import com.google.common.base.Predicates
-import io.maslick.barkoder.Status.*
+import io.maslick.barkoder.Status.ERROR
+import io.maslick.barkoder.Status.OK
+import org.keycloak.KeycloakSecurityContext
+import org.keycloak.representations.AccessToken
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import springfox.documentation.builders.PathSelectors
@@ -29,24 +31,38 @@ data class Response(val status: Status, val errorMessage: String? = null)
 
 @RestController
 @CrossOrigin
-class BarcoderRestController(val service: IService) {
+class BarcoderRestController(
+        val service: IService,
+        val securityContext: KeycloakSecurityContext?,
+        val accessToken: AccessToken?) {
 
-    @GetMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
+
+    @GetMapping("/items")
     fun getAllItems(): List<Item> {
+        securityContext?.apply {
+            println("AccessToken: $tokenString")
+        }
+
+        accessToken?.apply {
+            println("User id: $subject")
+            println("User: $email / $givenName $familyName")
+            println("Roles: ${realmAccess.roles.joinToString(", ")}")
+        }
+
         return service.getAll()
     }
 
-    @GetMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/item/{id}")
     fun getItem(@PathVariable id: Int): Item? {
         return service.getOneById(id)
     }
 
-    @GetMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/barcode/{barcode}")
     fun getItemByBarcode(@PathVariable barcode: String): Item? {
         return service.getOneByBarcode(barcode)
     }
 
-    @PostMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping("/item")
     fun postItem(@RequestBody item: Item): Response {
         return try {
             if (service.saveOne(item)) Response(OK)
@@ -57,7 +73,7 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @PostMapping(value = ["/items"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping("/items")
     fun postMultipleItems(@RequestBody items: List<Item>): Response {
         return try {
             if (service.saveMultiple(items)) Response(OK)
@@ -68,13 +84,13 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @PutMapping(value = ["/item"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @PutMapping("/item")
     fun putItem(@RequestBody item: Item): Response {
         return if (service.updateOne(item)) Response(OK)
         else Response(ERROR, "Could not update Item :(")
     }
 
-    @DeleteMapping(value = ["/item/{id}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping("/item/{id}")
     fun deleteItem(@PathVariable id: Int): Response {
         return try {
             service.deleteOne(id)
@@ -85,7 +101,7 @@ class BarcoderRestController(val service: IService) {
         }
     }
 
-    @DeleteMapping(value = ["/barcode/{barcode}"], produces = [APPLICATION_JSON_UTF8_VALUE])
+    @DeleteMapping("/barcode/{barcode}")
     fun deleteItemByBarcode(@PathVariable barcode: String): Response {
         return try {
             service.deleteOneByBarcode(barcode)
@@ -112,28 +128,30 @@ interface IService {
 class MyService(val repo: MyRepo): IService {
     override fun getAll() = repo.findAll()
     override fun getOneById(id: Int) = repo.findById(id).orElse(null)
-    override fun getOneByBarcode(barcode: String) = repo.findOneByBarcode(barcode)
+    override fun getOneByBarcode(barcode: String) = repo.findByBarcode(barcode).firstOrNull()
 
     override fun saveOne(item: Item): Boolean {
         if (item.barcode == null) return false
-        if (repo.findOneByBarcode(item.barcode!!) != null) return false
+        if (repo.findByBarcode(item.barcode!!).isNotEmpty()) return false
         repo.save(item)
         return true
     }
 
     override fun saveMultiple(items: List<Item>): Boolean {
         if (items.any { it.barcode == null }) return false
-        if (items.any { repo.findOneByBarcode(it.barcode!!) != null }) return false
+        if (items.any { repo.findByBarcode(it.barcode!!).isNotEmpty() }) return false
         repo.saveAll(items)
         return true
     }
 
     override fun updateOne(item: Item): Boolean {
-        return if (repo.existsById(item.id!!)) {
-            repo.save(item)
-            true
-        }
-        else false
+        if (item.id == null || item.barcode == null) return false
+        if (!repo.existsById(item.id!!)) return false
+
+        if (repo.findByBarcode(item.barcode!!).any { it.id != item.id }) return false
+
+        repo.save(item)
+        return true
     }
 
     override fun deleteOne(id: Int) {
@@ -143,7 +161,7 @@ class MyService(val repo: MyRepo): IService {
     }
 
     override fun deleteOneByBarcode(barcode: String) {
-        val item = repo.findOneByBarcode(barcode)
+        val item = repo.findByBarcode(barcode).firstOrNull()
         if (item == null) throw RuntimeException("item not found!")
         else repo.delete(item)
     }

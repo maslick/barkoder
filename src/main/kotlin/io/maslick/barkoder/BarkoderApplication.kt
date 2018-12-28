@@ -4,6 +4,8 @@ package io.maslick.barkoder
 import com.google.common.base.Predicates
 import io.maslick.barkoder.Status.ERROR
 import io.maslick.barkoder.Status.OK
+import org.keycloak.KeycloakSecurityContext
+import org.keycloak.representations.AccessToken
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -29,10 +31,24 @@ data class Response(val status: Status, val errorMessage: String? = null)
 
 @RestController
 @CrossOrigin
-class BarcoderRestController(val service: IService) {
+class BarcoderRestController(
+        val service: IService,
+        val securityContext: KeycloakSecurityContext?,
+        val accessToken: AccessToken?) {
+
 
     @GetMapping("/items")
     fun getAllItems(): List<Item> {
+        securityContext?.apply {
+            println("AccessToken: $tokenString")
+        }
+
+        accessToken?.apply {
+            println("User id: $subject")
+            println("User: $email / $givenName $familyName")
+            println("Roles: ${realmAccess.roles.joinToString(", ")}")
+        }
+
         return service.getAll()
     }
 

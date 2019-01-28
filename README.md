@@ -13,7 +13,7 @@ a minimalistic WMS system
 
 ## Features
 * simple REST API
-* OAuth2.0 by Keycloak
+* OAuth2.0 by Keycloak (optional)
 * written in Kotlin
 * leverages SpringBoot v2
 * Android [client](https://github.com/maslick/kodermobilj)
@@ -26,11 +26,11 @@ $ ./gradlew clean build
 
 or simply download the artifact from ``bintray``:
 ```
-$ wget -O barkoder-0.1.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.1/barkoder-0.1.jar
+$ wget -O barkoder-0.3.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.3/barkoder-0.3.jar
 ```
 
 ## Usage
-Create the file ``application.properties`` and put in the same directory as the jar:
+Create the file ``application.properties`` and put it in the same directory as the jar:
 ```
 # Db
 spring.datasource.platform=postgres

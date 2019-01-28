@@ -16,7 +16,8 @@ a minimalistic WMS system
 * OAuth2.0 by Keycloak (optional)
 * written in Kotlin
 * leverages SpringBoot v2
-* Android [client](https://github.com/maslick/kodermobilj)
+* Android native [client](https://github.com/maslick/kodermobilj)
+* Web [client](https://github.com/maslick/barkoder-ui)
 
 ## Installation
 ```

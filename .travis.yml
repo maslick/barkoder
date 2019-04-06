@@ -26,6 +26,7 @@ stages:
     if: branch = master AND type IN (push)
   - name: release
     if: branch = release AND type IN (push)
+  - name: heroku
   - name: docker
 
 jobs:
@@ -33,6 +34,18 @@ jobs:
     - stage: build
       name: "Building"
       script: ./gradlew build
+
+    - stage: snapshot
+      name: "Pushing to snapshot repo (artifactory)"
+      script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
+
+    - stage: release
+      name: "Pushing to release repo (bintray)"
+      script: ./gradlew build bintrayUpload -x test
+
+    - stage: heroku
+      name: "Deploy to Heroku"
+      script: skip
       deploy:
         provider: heroku
         api_key:
@@ -45,21 +58,13 @@ jobs:
         run:
           - restart
 
-    - stage: snapshot
-      name: "Pushing to snapshot repo (artifactory)"
-      script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
-
-    - stage: release
-      name: "Pushing to release repo (bintray)"
-      script: ./gradlew build bintrayUpload -x test
-
     - stage: docker
       name: "Pushing docker image to Docker hub"
       script:
         - ./gradlew build createDockerfile -x test
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_ID build/libs
-        - docker push
+        - docker push maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_ID
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

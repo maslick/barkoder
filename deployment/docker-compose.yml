@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: maslick/barkoder-ui:master-3
+    image: maslick/barkoder-ui
     restart: on-failure
     environment:
       - KC_ENABLED=false
@@ -15,7 +15,7 @@ services:
       - "8080:80"
 
   barkoder:
-    image: maslick/barkoder:master-141
+    image: maslick/barkoder
     restart: on-failure
     environment:
       - PGHOST=db

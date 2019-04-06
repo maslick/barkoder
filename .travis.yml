@@ -37,7 +37,6 @@ jobs:
       name: "Building, testing and sending codecov reports"
       script:
         - ./gradlew build
-        - ./gradlew publishToMavenLocal
       after_success:
         - bash <(curl -s https://codecov.io/bash)
 

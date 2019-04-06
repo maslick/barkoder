@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  barkoder:
+    image: maslick/barkoder:master-141
+    restart: on-failure
+    environment:
+      - PGHOST=db
+      - PGDATABASE=barkoderdb
+      - PGUSER=admin
+      - PGPASSWORD=password
+      - KC_ENABLED=false
+      - KCHOST=localhost
+      - REALM=barkoder
+      - CLIENT=barkoder-backend
+      - CLIENT_SECRET=xxxxxxx
+      - CLIENT_ROLE=craftroom
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:10
+    environment:
+      POSTGRES_DB: barkoderdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgbarkoder:/var/lib/postgresql/data
+
+volumes:
+  pgbarkoder:

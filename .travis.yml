@@ -5,6 +5,9 @@ sudo: false
 jdk:
   - oraclejdk8
 
+services:
+  - docker
+
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
@@ -23,6 +26,7 @@ stages:
     if: branch = master AND type IN (push)
   - name: release
     if: branch = release AND type IN (push)
+  - name: docker
 
 jobs:
   include:
@@ -48,6 +52,14 @@ jobs:
     - stage: release
       name: "Pushing to release repo (bintray)"
       script: ./gradlew build bintrayUpload -x test
+
+    - stage: docker
+      name: "Pushing docker image to Docker hub"
+      script:
+        - ./gradlew build createDockerfile -x test
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_ID
+        - docker push
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

@@ -21,6 +21,8 @@ plugins {
 
     id "com.jfrog.bintray" version "1.8.4"
     id "com.jfrog.artifactory" version "4.9.5"
+
+    id "com.bmuschko.docker-remote-api" version "4.6.2"
 }
 
 group = 'io.maslick'
@@ -128,4 +130,15 @@ bintray {
 
     publish = true
     override = true
+}
+
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file('build/libs/Dockerfile')
+    from 'amazoncorretto:11'
+    instruction 'LABEL maintainer="pavel.masloff@gmai.com"'
+    exposePort 8080
+    copyFile jar.archiveName, '/app/app.jar'
+    workingDir '/app'
+    instruction 'CMD java -jar app.jar'
 }

@@ -35,7 +35,9 @@ jobs:
   include:
     - stage: build
       name: "Building, testing and sending codecov reports"
-      script: ./gradlew build
+      script:
+        - ./gradlew build
+        - ./gradlew publishToMavenLocal
       after_success:
         - bash <(curl -s https://codecov.io/bash)
 

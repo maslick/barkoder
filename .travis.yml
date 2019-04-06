@@ -69,4 +69,6 @@ jobs:
         - ./gradlew build createDockerfile -x test
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER build/libs
+        - docker tag maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER maslick/barkoder
         - docker push maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
+        - docker push maslick/barkoder

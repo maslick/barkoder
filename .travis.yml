@@ -22,7 +22,6 @@ cache:
 
 stages:
   - name: build
-  - name: codecov
   - name: snapshot
     if: branch == master AND type == push
   - name: release
@@ -35,11 +34,8 @@ stages:
 jobs:
   include:
     - stage: build
-      name: "Building sources"
+      name: "Building, testing and sending codecov reports"
       script: ./gradlew build
-
-    - stage: codecov
-      script: skip
       after_success:
         - bash <(curl -s https://codecov.io/bash)
 

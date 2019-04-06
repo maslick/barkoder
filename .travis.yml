@@ -22,18 +22,26 @@ cache:
 
 stages:
   - name: build
+  - name: codecov
   - name: snapshot
-    if: branch = master AND type IN (push)
+    if: branch = master AND type IS push
   - name: release
-    if: branch = release AND type IN (push)
+    if: branch = release AND type IS push
   - name: heroku
+    if: branch IN (master, release) AND type IS push
   - name: docker
+    if: branch IN (master, release) AND type IS push
 
 jobs:
   include:
     - stage: build
-      name: "Building"
+      name: "Building sources"
       script: ./gradlew build
+
+    - stage: codecov
+      script: skip
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
 
     - stage: snapshot
       name: "Pushing to snapshot repo (artifactory)"
@@ -63,8 +71,5 @@ jobs:
       script:
         - ./gradlew build createDockerfile -x test
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_ID build/libs
-        - docker push maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_ID
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+        - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER build/libs
+        - docker push maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER

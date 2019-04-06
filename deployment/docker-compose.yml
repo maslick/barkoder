@@ -1,6 +1,19 @@
 version: '3'
 
 services:
+  web:
+    image: maslick/barkoder-ui:master-3
+    restart: on-failure
+    environment:
+      - KC_ENABLED=false
+      - KC_URL=https://keycloak.io/auth
+      - REALM=barkoder
+      - CLIENT_ID=barkoder-web
+      - KC_ROLE=craftroom
+      - BACKEND_URL=http://192.168.64.12:7777
+    ports:
+      - "8080:80"
+
   barkoder:
     image: maslick/barkoder:master-141
     restart: on-failure
@@ -10,18 +23,19 @@ services:
       - PGUSER=admin
       - PGPASSWORD=password
       - KC_ENABLED=false
-      - KCHOST=localhost
+      - KCHOST=https://keycloak.io
       - REALM=barkoder
       - CLIENT=barkoder-backend
-      - CLIENT_SECRET=xxxxxxx
+      - CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx
       - CLIENT_ROLE=craftroom
     ports:
-      - "8080:8080"
+      - "7777:8080"
     depends_on:
       - db
 
   db:
     image: postgres:10
+    restart: on-failure
     environment:
       POSTGRES_DB: barkoderdb
       POSTGRES_USER: admin

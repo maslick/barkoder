@@ -101,4 +101,11 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
 }
 ```
 
+## Docker-compose
+This [configuration](deployment/docker-compose.yml) contains three containers: frontend, backend, database. Edit environment variables according to your setup and then run: 
+
+```bash
+cd deployment
+docker-compose up -d 
+```
 

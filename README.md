@@ -32,7 +32,7 @@ $ ./gradlew clean build
 
 or simply download the artifact from ``bintray``:
 ```
-$ wget -O barkoder-0.3.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.3/barkoder-0.3.jar
+$ wget -O barkoder-0.4.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.4/barkoder-0.4.jar
 ```
 
 ## Usage
@@ -65,7 +65,7 @@ keycloak.securityConstraints[0].securityCollections[0].patterns[0]=/*
 ```
 Run the service:
 ```
-$ java -jar barkoder-0.1.jar
+$ java -jar barkoder-0.4.jar
 ```
 
 ## API

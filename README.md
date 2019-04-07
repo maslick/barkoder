@@ -5,7 +5,7 @@ a minimalistic WMS system
 [![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://cloud.docker.com/u/maslick/repository/docker/maslick/barkoder)
 [![Maintainability](https://api.codeclimate.com/v1/badges/22cf9e7940d43e7e8f16/maintainability)](https://codeclimate.com/github/maslick/barkoder/maintainability)
 [![codecov](https://codecov.io/gh/maslick/barkoder/branch/master/graph/badge.svg)](https://codecov.io/gh/maslick/barkoder)
-[ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg)](https://bintray.com/maslick/maven/barkoder/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 
@@ -16,9 +16,13 @@ a minimalistic WMS system
 * simple REST API
 * OAuth2.0 by Keycloak (optional)
 * written in Kotlin
-* leverages SpringBoot v2
+* SpringBoot v2
 * Android native [client](https://github.com/maslick/kodermobilj)
 * Web [client](https://github.com/maslick/barkoder-ui)
+* Heroku deployment
+* Docker image on Dockerhub
+* Docker-compose configuration
+* Openshift deployment
 
 ## Installation
 ```
@@ -110,3 +114,45 @@ cd deployment
 docker-compose up -d 
 ```
 
+## Openshift
+1. Create a new project
+```
+oc new-project test
+```
+
+2. Deploy database
+```
+oc new-app -f https://raw.githubusercontent.com/openshift/origin/master/examples/db-templates/postgresql-persistent-template.json \
+  -p DATABASE_SERVICE_NAME=barkoder-db \
+  -p POSTGRESQL_USER=admin \
+  -p POSTGRESQL_PASSWORD=password \
+  -p POSTGRESQL_DATABASE=barkoderdb
+
+```
+
+3. Deploy the service
+```
+oc new-app maslick/barkoder
+```
+
+4. Set env. variables
+```
+oc set env dc/barkoder \
+  PGHOST=barkoder-db \
+  PGHOST=db \
+  PGDATABASE=barkoderdb \
+  PGUSER=admin \
+  PGPASSWORD=password \
+  KC_ENABLED=false \
+  KCHOST=https://keycloak.io \
+  REALM=barkoder \
+  CLIENT=barkoder-backend \
+  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
+  CLIENT_ROLE=craftroom
+```
+
+5. Expose route
+```
+oc expose svc/barkoder --port=8080
+open http://barkoder-test.apps.example.com/items
+```

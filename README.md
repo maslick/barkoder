@@ -24,7 +24,7 @@ a minimalistic WMS system
 * Docker-compose configuration
 * Openshift deployment
 
-## Installation
+## Installation (local)
 ```
 $ git clone https://github.com/maslick/barkoder.git
 $ ./gradlew clean build
@@ -35,7 +35,7 @@ or simply download the artifact from ``bintray``:
 $ wget -O barkoder-0.4.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.4/barkoder-0.4.jar
 ```
 
-## Usage
+## Usage (local)
 Create the file ``application.properties`` and put it in the same directory as the jar:
 ```
 # Db
@@ -112,6 +112,22 @@ This [configuration](deployment/docker-compose.yml) contains three containers: f
 ```bash
 cd deployment
 docker-compose up -d 
+```
+
+## Heroku
+```
+heroku login
+git clone https://github.com/maslick/barkoder.git koder && cd koder
+heroku create my-barkoder
+heroku addons:create heroku-postgresql:hobby-dev
+heroku config:set \
+  KC_ENABLED=true \
+  KCHOST=https://keycloak.io \
+  REALM=barkoder \
+  CLIENT=barkoder-backend \
+  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
+  CLIENT_ROLE=craftroom
+git push heroku master
 ```
 
 ## Openshift

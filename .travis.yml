@@ -5,6 +5,9 @@ sudo: false
 jdk:
   - oraclejdk8
 
+services:
+  - docker
+
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
@@ -20,15 +23,34 @@ cache:
 stages:
   - name: build
   - name: snapshot
-    if: branch = master AND type IN (push)
+    if: branch == master AND type == push
   - name: release
-    if: branch = release AND type IN (push)
+    if: branch == release AND type == push
+  - name: heroku
+    if: branch IN (master, release) AND type == push
+  - name: docker
+    if: branch IN (master, release) AND type == push
 
 jobs:
   include:
     - stage: build
-      name: "Building"
-      script: ./gradlew build
+      name: "Building, testing and sending codecov reports"
+      script:
+        - ./gradlew build
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+
+    - stage: snapshot
+      name: "Pushing to snapshot repo (artifactory)"
+      script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
+
+    - stage: release
+      name: "Pushing to release repo (bintray)"
+      script: ./gradlew build bintrayUpload -x test
+
+    - stage: heroku
+      name: "Deploy to Heroku"
+      script: skip
       deploy:
         provider: heroku
         api_key:
@@ -41,13 +63,12 @@ jobs:
         run:
           - restart
 
-    - stage: snapshot
-      name: "Pushing to snapshot repo (artifactory)"
-      script: ./gradlew build artifactoryPublish -x test -Dsnapshot=true
-
-    - stage: release
-      name: "Pushing to release repo (bintray)"
-      script: ./gradlew build bintrayUpload -x test
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+    - stage: docker
+      name: "Pushing docker image to Docker hub"
+      script:
+        - ./gradlew build createDockerfile -x test
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker build -t maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER build/libs
+        - docker tag maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER maslick/barkoder
+        - docker push maslick/barkoder:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
+        - docker push maslick/barkoder

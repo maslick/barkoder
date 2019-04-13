@@ -1,39 +1,28 @@
-buildscript {
-    ext {
-        kotlinVersion = '1.3.20'
-        springBootVersion = '2.1.2.RELEASE'
-        keycloakVersion = '4.8.3.Final'
-    }
+plugins {
+    id "idea"
+    id "java"
 
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
+    id 'org.jetbrains.kotlin.jvm' version '1.3.21'
+    id 'org.jetbrains.kotlin.plugin.allopen' version '1.3.21'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.21'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.3.21'
+    id 'org.jetbrains.kotlin.plugin.noarg' version '1.3.21'
 
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath("com.netflix.nebula:nebula-publishing-plugin:5.1.0")
-        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-        classpath("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.0")
-    }
+    id "org.springframework.boot" version "2.1.3.RELEASE"
+    id "io.spring.dependency-management" version "1.0.7.RELEASE"
+
+    id "jacoco"
+    id "org.sonarqube" version "2.7"
+
+    id "nebula.javadoc-jar" version "9.5.0"
+    id "nebula.source-jar" version "9.5.0"
+    id "nebula.maven-publish" version "9.5.0"
+
+    id "com.jfrog.bintray" version "1.8.4"
+    id "com.jfrog.artifactory" version "4.9.5"
+
+    id "com.bmuschko.docker-remote-api" version "4.6.2"
 }
-
-apply plugin: 'java'
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-spring'
-apply plugin: 'kotlin-jpa'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'nebula.maven-publish'
-apply plugin: 'nebula.javadoc-jar'
-apply plugin: 'nebula.source-jar'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: "com.jfrog.artifactory"
-apply plugin: 'jacoco'
 
 group = 'io.maslick'
 version = '0.4' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
@@ -57,10 +46,22 @@ repositories {
     jcenter()
 }
 
+ext {
+    keycloakVersion = '4.8.3.Final'
+    bintrayUser = System.getenv('BINTRAY_USER')
+    bintrayKey = System.getenv('BINTRAY_KEY')
+    buildNumber = System.getenv('TRAVIS_BUILD_NUMBER')
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.keycloak.bom:keycloak-adapter-bom:$keycloakVersion"
+    }
+}
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -78,18 +79,13 @@ dependencies {
     implementation 'org.keycloak:keycloak-spring-boot-starter'
 }
 
-
-dependencyManagement {
-    imports {
-        mavenBom "org.keycloak.bom:keycloak-adapter-bom:${keycloakVersion}"
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
     }
 }
-
-ext{
-    bintrayUser = System.getenv('BINTRAY_USER')
-    bintrayKey = System.getenv('BINTRAY_KEY')
-    buildNumber = System.getenv('TRAVIS_BUILD_NUMBER')
-}
+check.dependsOn jacocoTestReport
 
 artifactory {
     contextUrl = 'http://oss.jfrog.org'
@@ -103,10 +99,7 @@ artifactory {
             publications('nebula')
             publishArtifacts = true
             publishPom = true
-            properties = [
-                    'build.number': buildNumber,
-                    'build.name': 'barkoder'
-            ]
+            properties = ['build.number': buildNumber, 'build.name': 'barkoder']
         }
     }
     resolve {
@@ -138,11 +131,13 @@ bintray {
     override = true
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file('build/libs/Dockerfile')
+    from 'amazoncorretto:11'
+    instruction 'LABEL maintainer="pavel.masloff@gmai.com"'
+    exposePort 8080
+    copyFile jar.archiveName, '/app/app.jar'
+    workingDir '/app'
+    instruction 'CMD java -jar app.jar'
 }
-
-check.dependsOn jacocoTestReport

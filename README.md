@@ -2,6 +2,7 @@
 a minimalistic WMS system
 
 [![Build Status](https://travis-ci.org/maslick/barkoder.svg?branch=master)](https://travis-ci.org/maslick/barkoder)
+[![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://cloud.docker.com/u/maslick/repository/docker/maslick/barkoder)
 [![Maintainability](https://api.codeclimate.com/v1/badges/22cf9e7940d43e7e8f16/maintainability)](https://codeclimate.com/github/maslick/barkoder/maintainability)
 [![codecov](https://codecov.io/gh/maslick/barkoder/branch/master/graph/badge.svg)](https://codecov.io/gh/maslick/barkoder)
 [ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)
@@ -15,10 +16,15 @@ a minimalistic WMS system
 * simple REST API
 * OAuth2.0 by Keycloak (optional)
 * written in Kotlin
-* leverages SpringBoot v2
-* Android [client](https://github.com/maslick/kodermobilj)
+* SpringBoot v2
+* Android native [client](https://github.com/maslick/kodermobilj)
+* Web [client](https://github.com/maslick/barkoder-ui)
+* Heroku deployment
+* Docker image on Dockerhub
+* Docker-compose configuration
+* Openshift deployment
 
-## Installation
+## Installation (local)
 ```
 $ git clone https://github.com/maslick/barkoder.git
 $ ./gradlew clean build
@@ -26,10 +32,10 @@ $ ./gradlew clean build
 
 or simply download the artifact from ``bintray``:
 ```
-$ wget -O barkoder-0.3.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.3/barkoder-0.3.jar
+$ wget -O barkoder-0.4.jar https://bintray.com/maslick/maven/download_file?file_path=io/maslick/barkoder/0.4/barkoder-0.4.jar
 ```
 
-## Usage
+## Usage (local)
 Create the file ``application.properties`` and put it in the same directory as the jar:
 ```
 # Db
@@ -59,7 +65,7 @@ keycloak.securityConstraints[0].securityCollections[0].patterns[0]=/*
 ```
 Run the service:
 ```
-$ java -jar barkoder-0.1.jar
+$ java -jar barkoder-0.4.jar
 ```
 
 ## API
@@ -100,4 +106,69 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
 }
 ```
 
+## Docker-compose
+This [configuration](deployment/docker-compose.yml) contains three containers: frontend, backend, database. Edit environment variables according to your setup and then run: 
 
+```bash
+cd deployment
+docker-compose up -d 
+```
+
+## Heroku
+```
+heroku login
+git clone https://github.com/maslick/barkoder.git koder && cd koder
+heroku create my-barkoder
+heroku addons:create heroku-postgresql:hobby-dev
+heroku config:set \
+  KC_ENABLED=true \
+  KCHOST=https://keycloak.io \
+  REALM=barkoder \
+  CLIENT=barkoder-backend \
+  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
+  CLIENT_ROLE=craftroom
+git push heroku master
+```
+
+## Openshift
+1. Create a new project
+```
+oc new-project test
+```
+
+2. Deploy database
+```
+oc new-app -f https://raw.githubusercontent.com/openshift/origin/master/examples/db-templates/postgresql-persistent-template.json \
+  -p DATABASE_SERVICE_NAME=barkoder-db \
+  -p POSTGRESQL_USER=admin \
+  -p POSTGRESQL_PASSWORD=password \
+  -p POSTGRESQL_DATABASE=barkoderdb
+
+```
+
+3. Deploy the service
+```
+oc new-app maslick/barkoder
+```
+
+4. Set env. variables
+```
+oc set env dc/barkoder \
+  PGHOST=barkoder-db \
+  PGHOST=db \
+  PGDATABASE=barkoderdb \
+  PGUSER=admin \
+  PGPASSWORD=password \
+  KC_ENABLED=false \
+  KCHOST=https://keycloak.io \
+  REALM=barkoder \
+  CLIENT=barkoder-backend \
+  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
+  CLIENT_ROLE=craftroom
+```
+
+5. Expose route
+```
+oc expose svc/barkoder --port=8080
+open http://barkoder-test.apps.example.com/items
+```

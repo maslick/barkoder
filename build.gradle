@@ -62,6 +62,7 @@ dependencyManagement {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -137,7 +138,7 @@ task createDockerfile(type: Dockerfile) {
     from 'amazoncorretto:11'
     instruction 'LABEL maintainer="pavel.masloff@gmai.com"'
     exposePort 8080
-    copyFile jar.archiveName, '/app/app.jar'
+    copyFile jar.archiveFileName.get(), '/app/app.jar'
     workingDir '/app'
     instruction 'CMD java -jar app.jar'
 }

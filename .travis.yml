@@ -26,9 +26,9 @@ stages:
     if: branch == master AND type == push
   - name: release
     if: branch == release AND type == push
-  - name: heroku
-    if: branch IN (master, release) AND type == push
   - name: docker
+    if: branch IN (master, release) AND type == push
+  - name: heroku
     if: branch IN (master, release) AND type == push
 
 jobs:

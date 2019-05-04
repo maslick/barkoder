@@ -38,8 +38,8 @@ spec:
                     operator: Exists
               weight: 100
       containers:
-        - image: maslick/barkoder:master-34022dd-build156
-          imagePullPolicy: IfNotPresent
+        - image: maslick/barkoder
+          imagePullPolicy: Always
           name: barkoder-api
           resources:
             requests:

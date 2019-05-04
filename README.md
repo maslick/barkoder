@@ -23,6 +23,7 @@ a minimalistic WMS system
 * Docker image on Dockerhub
 * Docker-compose configuration
 * Openshift deployment
+* Kubernetes descriptors
 
 ## Installation (local)
 ```

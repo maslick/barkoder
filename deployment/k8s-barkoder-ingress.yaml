@@ -32,4 +32,5 @@ spec:
   tls:
     - secretName: tls-prod-cert
       hosts:
-        - '*.maslick.ru'
+        - 'koder-api.maslick.ru'
+        - 'koder.maslick.ru'

@@ -38,7 +38,7 @@ spec:
                     operator: Exists
               weight: 100
       containers:
-        - image: maslick/barkoder-ui
+        - image: maslick/barkoder-ui:react-build31-08511e8
           imagePullPolicy: Always
           name: barkoder-web
           resources:

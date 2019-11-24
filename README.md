@@ -2,7 +2,7 @@
 a minimalistic WMS system
 
 [![Build Status](https://travis-ci.org/maslick/barkoder.svg?branch=master)](https://travis-ci.org/maslick/barkoder)
-[![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://cloud.docker.com/u/maslick/repository/docker/maslick/barkoder)
+[![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://hub.docker.com/r/maslick/barkoder)
 [![Maintainability](https://api.codeclimate.com/v1/badges/22cf9e7940d43e7e8f16/maintainability)](https://codeclimate.com/github/maslick/barkoder/maintainability)
 [![codecov](https://codecov.io/gh/maslick/barkoder/branch/master/graph/badge.svg)](https://codecov.io/gh/maslick/barkoder)
 [ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)

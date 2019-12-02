@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: barkoder-web
+  labels:
+    maintainer: maslick
+    project: barkoder
+    app: barkoder-web
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+  selector:
+    maintainer: maslick
+    project: barkoder
+    app: barkoder-web
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: barkoder-web
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: barkoder-web
+      labels:
+        maintainer: maslick
+        project: barkoder
+        app: barkoder-web
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: cloud.google.com/gke-preemptible
+                    operator: Exists
+              weight: 100
+      containers:
+        - image: maslick/barkoder-ui:react-build31-08511e8
+          imagePullPolicy: Always
+          name: barkoder-web
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 300m
+              memory: 1Gi
+          env:
+            - name: KC_ENABLED
+              value: 'true'
+            - name: KC_URL
+              value: 'https://keycloak-maslick-io.1d35.starter-us-east-1.openshiftapps.com/auth'
+            - name: REALM
+              value: 'barkoder'
+            - name: CLIENT_ID
+              value: 'barkoder-frontend'
+            - name: KC_ROLE
+              value: 'craftroom'
+            - name: BACKEND_URL
+              value: 'https://koder-api.maslick.ru'
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30

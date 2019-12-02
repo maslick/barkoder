@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: barkoder-api
+  labels:
+    maintainer: maslick
+    project: barkoder
+    app: barkoder-api
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+  selector:
+    maintainer: maslick
+    project: barkoder
+    app: barkoder-api
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: barkoder-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: barkoder-api
+      labels:
+        maintainer: maslick
+        project: barkoder
+        app: barkoder-api
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: cloud.google.com/gke-preemptible
+                    operator: Exists
+              weight: 100
+      containers:
+        - image: maslick/barkoder
+          imagePullPolicy: Always
+          name: barkoder-api
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 2Gi
+          env:
+            - name: PGHOST
+              value: 'barkoder-db-postgresql'
+            - name: PGDATABASE
+              value: 'barkoderdb'
+            - name: PGUSER
+              value: 'barkoder'
+            - name: PGPASSWORD
+              value: 'password'
+            - name: SSLMODE
+              value: 'disable'
+            - name: KC_ENABLED
+              value: 'true'
+            - name: KCHOST
+              value: 'https://keycloak-maslick-io.1d35.starter-us-east-1.openshiftapps.com'
+            - name: REALM
+              value: 'barkoder'
+            - name: CLIENT
+              value: 'barkoder-backend'
+            - name: CLIENT_SECRET
+              value: 'xxxxxxxxx-xxxxx-xxxx'
+            - name: CLIENT_ROLE
+              value: 'craftroom'
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30

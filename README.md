@@ -2,11 +2,10 @@
 a minimalistic WMS system
 
 [![Build Status](https://travis-ci.org/maslick/barkoder.svg?branch=master)](https://travis-ci.org/maslick/barkoder)
-[![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://cloud.docker.com/u/maslick/repository/docker/maslick/barkoder)
+[![Docker image](https://shields.beevelop.com/docker/image/image-size/maslick/barkoder/latest.svg?style=flat-square)](https://hub.docker.com/r/maslick/barkoder)
 [![Maintainability](https://api.codeclimate.com/v1/badges/22cf9e7940d43e7e8f16/maintainability)](https://codeclimate.com/github/maslick/barkoder/maintainability)
 [![codecov](https://codecov.io/gh/maslick/barkoder/branch/master/graph/badge.svg)](https://codecov.io/gh/maslick/barkoder)
 [ ![Download](https://api.bintray.com/packages/maslick/maven/barkoder/images/download.svg) ](https://bintray.com/maslick/maven/barkoder/_latestVersion)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 
 
@@ -23,6 +22,7 @@ a minimalistic WMS system
 * Docker image on Dockerhub
 * Docker-compose configuration
 * Openshift deployment
+* Kubernetes descriptors
 
 ## Installation (local)
 ```
@@ -106,69 +106,9 @@ If the REST API is secured with ``Keycloak``, an ``Authorization`` header should
 }
 ```
 
-## Docker-compose
-This [configuration](deployment/docker-compose.yml) contains three containers: frontend, backend, database. Edit environment variables according to your setup and then run: 
-
-```bash
-cd deployment
-docker-compose up -d 
-```
-
-## Heroku
-```
-heroku login
-git clone https://github.com/maslick/barkoder.git koder && cd koder
-heroku create my-barkoder
-heroku addons:create heroku-postgresql:hobby-dev
-heroku config:set \
-  KC_ENABLED=true \
-  KCHOST=https://keycloak.io \
-  REALM=barkoder \
-  CLIENT=barkoder-backend \
-  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
-  CLIENT_ROLE=craftroom
-git push heroku master
-```
-
-## Openshift
-1. Create a new project
-```
-oc new-project test
-```
-
-2. Deploy database
-```
-oc new-app -f https://raw.githubusercontent.com/openshift/origin/master/examples/db-templates/postgresql-persistent-template.json \
-  -p DATABASE_SERVICE_NAME=barkoder-db \
-  -p POSTGRESQL_USER=admin \
-  -p POSTGRESQL_PASSWORD=password \
-  -p POSTGRESQL_DATABASE=barkoderdb
-
-```
-
-3. Deploy the service
-```
-oc new-app maslick/barkoder
-```
-
-4. Set env. variables
-```
-oc set env dc/barkoder \
-  PGHOST=barkoder-db \
-  PGHOST=db \
-  PGDATABASE=barkoderdb \
-  PGUSER=admin \
-  PGPASSWORD=password \
-  KC_ENABLED=false \
-  KCHOST=https://keycloak.io \
-  REALM=barkoder \
-  CLIENT=barkoder-backend \
-  CLIENT_SECRET=xxxxxxx-xxxx-xxxx-xxxx-xxxxxxx \
-  CLIENT_ROLE=craftroom
-```
-
-5. Expose route
-```
-oc expose svc/barkoder --port=8080
-open http://barkoder-test.apps.example.com/items
-```
+## Deployments
+* [Docker-compose](deployment/compose.md)
+* [Heroku](deployment/heroku.md)
+* [Openshift](deployment/openshift.md)
+* [Terraform](terraform/README.md)
+* [Kubernetes](deployment/k8s.md)
